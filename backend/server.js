@@ -13,6 +13,15 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+// Serve static files from frontend build directory
+app.use(express.static(path.join(__dirname, '../frontend/dist')));
+
+// Catch-all route to serve the React app for unknown routes
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/dist/index.html'));
+});
+
+
 // Layout Template Path
 const layoutPath = path.join(__dirname, 'layout.html');
 
