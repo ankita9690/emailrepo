@@ -40,7 +40,9 @@ const upload = multer({ storage });
 
 // API to upload an image
 app.post('/uploadImage', upload.single('image'), (req, res) => {
-    const imageUrl = `http://localhost:${PORT}/uploads/${req.file.filename}`;
+    // const imageUrl = `http://localhost:${PORT}/uploads/${req.file.filename}`;
+    const imageUrl = `${req.protocol}://${req.headers.host}/uploads/${req.file.filename}`;
+
     res.json({ success: true, imageUrl });
 });
 
