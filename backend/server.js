@@ -48,8 +48,12 @@ app.post('/uploadImage', upload.single('image'), (req, res) => {
 
 // API to save email template configuration
 app.post('/uploadEmailConfig', (req, res) => {
-    // console.log(req.body);
     const { title, header, content, footer, imageUrl, imageUrll } = req.body;
+
+    // Read the CSS file content
+    const cssContent = fs.readFileSync(path.join(__dirname, 'output.css'), 'utf8');
+
+    // Create the email template using the provided data
     const outputHtml = fs.readFileSync(layoutPath, 'utf8')
         .replace('{{title}}', title)
         .replace('{{header}}', header)
@@ -58,9 +62,30 @@ app.post('/uploadEmailConfig', (req, res) => {
         .replace('{{imageUrl}}', imageUrl)
         .replace('{{imageUrll}}', imageUrll);
 
-    fs.writeFileSync('output.html', outputHtml);  // Saving the template
-    res.json({ success: true, message: 'Template saved successfully.' });
+    // Embed the CSS into the HTML
+    const htmlWithCss = outputHtml.replace(
+        '<head>',
+        `<head>
+            <style>
+                ${cssContent}
+            </style>`
+    );
+
+    // Save the generated template to output.html
+    const outputPath = path.join(__dirname, 'output.html');
+    fs.writeFileSync(outputPath, htmlWithCss);
+
+    // Send the generated file as the response for download
+    res.download(outputPath, 'output.html', (err) => {
+        if (err) {
+            console.log("Error during file download: ", err);
+            res.status(500).send("Error during download.");
+        }
+    });
 });
+
+
+
 
 // API to download the rendered email template
 app.get('/renderAndDownloadTemplate', (req, res) => {

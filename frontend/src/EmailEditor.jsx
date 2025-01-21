@@ -12,6 +12,7 @@ const EmailEditor = () => {
     });
     const [imagePreview, setImagePreview] = useState(null); // Preview for the first image
     const [imagePreview2, setImagePreview2] = useState(null); // Preview for the second image
+    const [downloadLink, setDownloadLink] = useState(null); // To hold the download link
 
     useEffect(() => {
         fetch('http://localhost:5000/getEmailLayout')
@@ -53,8 +54,17 @@ const EmailEditor = () => {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(formData),
         });
-        console.log(response);
-        if (response.ok) alert('Template saved successfully!');
+
+        if (response.ok) {
+            // Trigger download once the response is OK
+            const blob = await response.blob();
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'output.html'; // Specify the filename for download
+            link.click();
+        } else {
+            alert('Failed to save template.');
+        }
     };
 
     return (
@@ -97,7 +107,7 @@ const EmailEditor = () => {
                 value={formData.footer}
                 onChange={handleInputChange}
             />
-            <button onClick={handleSubmit}>Save Template</button>
+            <button onClick={handleSubmit}>Save and Download Template</button>
         </div>
     );
 };
